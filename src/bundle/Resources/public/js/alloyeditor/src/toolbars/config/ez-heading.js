@@ -1,14 +1,14 @@
 import EzConfigBase from './base';
 
 export default class EzHeadingConfig extends EzConfigBase {
-    constructor() {
+    constructor(customStyles = []) {
         super();
 
         this.name = 'heading';
         this.buttons = [
             'ezmoveup',
             'ezmovedown',
-            this.getStyles(),
+            this.getStyles(customStyles),
             'ezblocktextalignleft',
             'ezblocktextaligncenter',
             'ezblocktextalignright',

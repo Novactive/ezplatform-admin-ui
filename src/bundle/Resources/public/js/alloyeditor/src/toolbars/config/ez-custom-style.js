@@ -1,10 +1,10 @@
 import EzConfigBase from './base';
 
-export default class EzParagraphConfig extends EzConfigBase {
+export default class EzCustomStyleConfig extends EzConfigBase {
     constructor(customStyles = []) {
         super();
 
-        this.name = 'paragraph';
+        this.name = 'custom-style';
         this.buttons = [
             'ezmoveup',
             'ezmovedown',
@@ -15,6 +15,16 @@ export default class EzParagraphConfig extends EzConfigBase {
             'ezblocktextalignjustify',
             'ezblockremove',
         ];
+    }
+
+    getStyles(customStyles = []) {
+        return {
+            name: 'styles',
+            cfg: {
+                showRemoveStylesItem: false,
+                styles: [...customStyles],
+            },
+        };
     }
 
     /**
@@ -34,6 +44,12 @@ export default class EzParagraphConfig extends EzConfigBase {
         const nativeEditor = payload.editor.get('nativeEditor');
         const path = nativeEditor.elementPath();
 
-        return (nativeEditor.isSelectionEmpty() && path && path.contains('p'));
+        return (
+            nativeEditor.isSelectionEmpty() &&
+            path &&
+            path.contains(function(el) {
+                return el.hasAttribute('data-style');
+            })
+        );
     }
 }
