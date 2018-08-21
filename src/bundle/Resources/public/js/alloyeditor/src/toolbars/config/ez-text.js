@@ -1,9 +1,10 @@
 import AlloyEditor from 'alloyeditor';
 
 export default class EzTextConfig  {
-    constructor() {
+    constructor(customStyles = []) {
         this.name = 'text';
         this.buttons = [
+            this.getStyles(customStyles),
             'ezbold',
             'ezitalic',
             'ezunderline',
@@ -15,5 +16,15 @@ export default class EzTextConfig  {
         ];
 
         this.test = AlloyEditor.SelectionTest.text;
+    }
+
+    getStyles(customStyles = []) {
+        return {
+            name: 'styles',
+            cfg: {
+                showRemoveStylesItem: true,
+                styles: [...customStyles],
+            },
+        };
     }
 }

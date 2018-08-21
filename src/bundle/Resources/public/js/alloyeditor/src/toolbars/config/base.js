@@ -59,7 +59,7 @@ export default class EzConfigBase {
         return true;
     }
 
-    getStyles() {
+    getStyles(customStyles = []) {
         return {
             name: 'styles',
             cfg: {
@@ -72,6 +72,7 @@ export default class EzConfigBase {
                     {name: 'Heading 5', style: {element: 'h5'}},
                     {name: 'Heading 6', style: {element: 'h6'}},
                     {name: 'Paragraph', style: {element: 'p'}},
+                    ...customStyles
                 ]
             }
         };
