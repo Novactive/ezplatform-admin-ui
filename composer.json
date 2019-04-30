@@ -41,7 +41,8 @@
         "_ezplatform_branch_for_behat_tests": "master",
         "branch-alias": {
             "dev-tmp_ci_branch": "1.5.x-dev",
-            "dev-master": "1.5.x-dev"
+            "dev-master": "1.5.x-dev",
+            "dev-release-bo-evols": "1.5.x-dev"
         }
     }
 }
