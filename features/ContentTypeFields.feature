@@ -3,7 +3,7 @@ Feature: Content fields setting and editing
   In order to manage content on my site
   I want to set, edit, copy and move content items.
 
-  @javascript @common @fieldTypes
+  @javascript @common
   Scenario Outline: Create content item with given field
     Given a Content Type "<fieldName> CT" with an "<fieldInternalName>" field definition
       And I am logged as "admin"
@@ -13,8 +13,8 @@ Feature: Content fields setting and editing
         | label    | <label1> | <label2> | <label3> |
         | Field    | <value1> | <value2> | <value3> |
       And I click on the edit action bar button "Publish"
-    Then I should be on content item page "<contentItemName>" of type "<fieldName> CT" in root path
-      And success notification that "Content published." appears
+    Then success notification that "Content published." appears
+      And I should be on content item page "<contentItemName>" of type "<fieldName> CT" in root path
       And content attributes equal
         | label    | <label1> | <label2> | <label3> |
         | Field    | <value1> | <value2> | <value3> |
@@ -44,7 +44,7 @@ Feature: Content fields setting and editing
       | ezimage              | Image                        | value     | image1.png.zip            |            |                       |         |          | image1.png                |
       | ezbinaryfile         | File                         | value     | binary1.txt.zip           |            |                       |         |          | binary1.txt               |
 
-  @javascript @common @fieldTypes
+  @javascript @common
   Scenario Outline: Edit content item with given field
     Given I am logged as "admin"
       And I navigate to content "<oldContentItemName>" of type "<fieldName> CT" in root path
@@ -53,8 +53,8 @@ Feature: Content fields setting and editing
         | label    | <label1> | <label2> | <label3> |
         | Field    | <value1> | <value2> | <value3> |
       And I click on the edit action bar button "Publish"
-    Then I should be on content item page "<newContentItemName>" of type "<fieldName> CT" in root path
-      And success notification that "Content published." appears
+    Then success notification that "Content published." appears
+      And I should be on content item page "<newContentItemName>" of type "<fieldName> CT" in root path
       And content attributes equal
         | label    | <label1> | <label2> | <label3> |
         | Field    | <value1> | <value2> | <value3> |

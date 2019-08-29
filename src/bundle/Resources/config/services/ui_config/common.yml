@@ -8,6 +8,7 @@ services:
         public: true
 
     EzSystems\EzPlatformAdminUi\UI\Config\Aggregator:
+        lazy: true
         public: true
 
     EzSystems\EzPlatformAdminUi\UI\Config\Provider\ContentTypeMappings:
@@ -48,6 +49,8 @@ services:
             - { name: ezplatform.admin_ui.config_provider, key: 'user' }
 
     EzSystems\EzPlatformAdminUi\UI\Config\Provider\Languages:
+        arguments:
+            $siteAccesses: '%ezpublish.siteaccess.list%'
         tags:
             - { name: ezplatform.admin_ui.config_provider, key: 'languages' }
 
@@ -107,3 +110,7 @@ services:
     EzSystems\EzPlatformAdminUiBundle\Templating\Twig\PathStringExtension: ~
 
     EzSystems\EzPlatformAdminUiBundle\Templating\Twig\ContentTypeIconExtension: ~
+
+    EzSystems\EzPlatformAdminUi\UI\Config\Provider\UserContentTypes:
+        tags:
+            - { name: ezplatform.admin_ui.config_provider, key: 'userContentTypes' }

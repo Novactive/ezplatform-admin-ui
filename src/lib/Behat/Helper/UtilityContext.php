@@ -23,11 +23,13 @@ class UtilityContext extends MinkContext
      *
      * @throws Exception when element not found or is not visible
      */
-    public function waitUntilElementIsVisible(string $cssSelector, int $timeout = 5): void
+    public function waitUntilElementIsVisible(string $cssSelector, int $timeout = 5, TraversableElement $baseElement = null): void
     {
         try {
-            $this->waitUntil($timeout, function () use ($cssSelector) {
-                $element = $this->getSession()->getPage()->find('css', $cssSelector);
+            $this->waitUntil($timeout, function () use ($cssSelector, $baseElement) {
+                $baseElement = $baseElement ?? $this->getSession()->getPage();
+
+                $element = $baseElement->find('css', $cssSelector);
 
                 return isset($element) && $element->isVisible();
             });
@@ -201,7 +203,7 @@ class UtilityContext extends MinkContext
         } while (time() < $end);
 
         if ($throwOnFailure) {
-            throw new Exception('Spin function did not return in time. Internal exception:' . $lastInternalExceptionMessage);
+            throw new Exception('Spin function did not return in time. Last internal exception:' . $lastInternalExceptionMessage);
         }
     }
 

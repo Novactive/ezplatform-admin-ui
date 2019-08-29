@@ -22,6 +22,7 @@ imports:
     - { resource: services/rest.yml }
     - { resource: services/permissions.yml }
     - { resource: services/forms.yml }
+    - { resource: services/query_types.yaml }
 
 services:
     _defaults:
@@ -72,6 +73,7 @@ services:
             - {name: kernel.event_subscriber}
 
     EzSystems\EzPlatformAdminUi\UI\Dataset\DatasetFactory:
+        lazy: true
         arguments:
             $userContentTypeIdentifier: '$user_content_type_identifier$'
             $userGroupContentTypeIdentifier: '$user_group_content_type_identifier$'
@@ -98,6 +100,8 @@ services:
             $siteAccessGroups: '%ezpublish.siteaccess.groups%'
             $kernelRootDir: '%kernel.root_dir%'
             $kernelEnvironment: '%kernel.environment%'
+            $encoreTagRenderer: '@webpack_encore.tag_renderer'
+            $entrypointLookupCollection: '@webpack_encore.entrypoint_lookup_collection'
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
@@ -124,6 +128,7 @@ services:
         tags:
             - {name: kernel.event_subscriber, priority: -250}
 
-    EzSystems\EzPlatformAdminUiBundle\Templating\Twig\UserPreferencesGlobalExtension: ~
+    EzSystems\EzPlatformAdminUiBundle\Templating\Twig\UserPreferencesGlobalExtension:
+        lazy: true
 
     EzSystems\EzPlatformAdminUi\UI\Service\ContentTypeIconResolver: ~

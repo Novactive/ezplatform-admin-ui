@@ -6,20 +6,64 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\Helper;
 
+use Behat\Behat\Hook\Call\BeforeStep;
+use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Behat\Hook\Scope\AfterStepScope;
+use Behat\Behat\Hook\Scope\BeforeScenarioScope;
+use Behat\Behat\Hook\Scope\BeforeStepScope;
 use Behat\Mink\Driver\Selenium2Driver;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Behat\Symfony2Extension\Context\KernelDictionary;
 use Behat\Testwork\Tester\Result\TestResult;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageObject\PageObjectFactory;
+use Psr\Log\LoggerInterface;
 use WebDriver\LogType;
 
 class Hooks extends RawMinkContext
 {
     private const CONSOLE_LOGS_LIMIT = 10;
+    private const APPLICATION_LOGS_LIMIT = 25;
+    private const LOG_FILE_NAME = 'travis_test.log';
+    private $logger;
 
     use KernelDictionary;
+
+    /**
+     * @injectService $logger @logger
+     */
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    /** @BeforeScenario
+     */
+    public function logStartingScenario(BeforeScenarioScope $scope)
+    {
+        $this->logger->error(sprintf('Starting Scenario "%s"', $scope->getScenario()->getTitle()));
+    }
+
+    /** @BeforeStep
+     */
+    public function logStartingStep(BeforeStepScope $scope)
+    {
+        $this->logger->error(sprintf('Starting Step %s', $scope->getStep()->getText()));
+    }
+
+    /** @AfterScenario
+     */
+    public function logEndingScenario(AfterScenarioScope $scope)
+    {
+        $this->logger->error(sprintf('Ending Scenario "%s"', $scope->getScenario()->getTitle()));
+    }
+
+    /** @AfterStep
+     */
+    public function logEndingStep(AfterStepScope $scope)
+    {
+        $this->logger->error(sprintf('Ending Step %s', $scope->getStep()->getText()));
+    }
 
     /** @BeforeScenario
      */
@@ -33,30 +77,8 @@ class Hooks extends RawMinkContext
         EzEnvironmentConstants::setInstallType($installType);
     }
 
-    /** @BeforeScenario @restoreEnvironmentBefore
-     * Restores the database and clears cache for tests marked with @restoreEnvironmentBefore tag
-     */
-    public function restoreEnvironmentBeforeScenario()
-    {
-        $env = new Environment($this->getContainer());
-
-        $env->restoreDatabase();
-        $env->clearCache();
-    }
-
-    /** @AfterScenario @restoreEnvironmentAfter
-     * Restores the database and clears cache for tests marked with @restoreEnvironmentAfter tag
-     */
-    public function restoreEnvironmentAfterScenario()
-    {
-        $env = new Environment($this->getContainer());
-
-        $env->restoreDatabase();
-        $env->clearCache();
-    }
-
     /** @AfterStep */
-    public function getBrowserLogAfterFailedStep(AfterStepScope $scope)
+    public function getLogsAfterFailedStep(AfterStepScope $scope)
     {
         if ($scope->getTestResult()->getResultCode() !== TestResult::FAILED) {
             return;
@@ -64,27 +86,40 @@ class Hooks extends RawMinkContext
 
         $driver = $this->getSession()->getDriver();
         if ($driver instanceof Selenium2Driver) {
-            $logEntries = $driver->getWebDriverSession()->log(LogType::BROWSER);
-
-            if (empty($logEntries)) {
-                return;
-            }
-
-            $this->print('JS console errors:');
-            $counter = 0;
-            foreach ($logEntries as $entry) {
-                if ($counter >= self::CONSOLE_LOGS_LIMIT) {
-                    return;
-                }
-
-                $this->print($entry['message']);
-                ++$counter;
-            }
+            $browserLogEntries = $this->parseBrowserLogs($driver->getWebDriverSession()->log(LogType::BROWSER));
+            $this->displayLogEntries('JS console errors:', $browserLogEntries);
         }
+
+        $logReader = new LogFileReader();
+
+        $applicationLogEntries = $logReader->getLastLines(sprintf('%s/%s', $this->getKernel()->getLogDir(), self::LOG_FILE_NAME), self::APPLICATION_LOGS_LIMIT);
+        $this->displayLogEntries('Application errors:', $applicationLogEntries);
     }
 
-    private function print(string $message): void
+    private function parseBrowserLogs($logEntries): array
     {
-        echo sprintf('%s%s', $message, PHP_EOL);
+        $filter = new BrowserLogFilter();
+
+        if (empty($logEntries)) {
+            return [];
+        }
+
+        $errorMessages = array_column($logEntries, 'message');
+        $errorMessages = $filter->filter($errorMessages);
+
+        return \array_slice($errorMessages, 0, self::CONSOLE_LOGS_LIMIT);
+    }
+
+    private function displayLogEntries($sectionName, $logEntries)
+    {
+        if (empty($logEntries)) {
+            return;
+        }
+
+        echo sprintf('%s' . PHP_EOL, $sectionName);
+
+        foreach ($logEntries as $logEntry) {
+            echo sprintf('%s' . PHP_EOL, $logEntry);
+        }
     }
 }
