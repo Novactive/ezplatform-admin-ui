@@ -19,6 +19,7 @@ use EzSystems\EzPlatformAdminUi\Form\Data\Search\SearchData;
 use EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory;
 use EzSystems\EzPlatformAdminUi\Form\SubmitHandler;
 use EzSystems\EzPlatformAdminUi\Tab\Dashboard\PagerContentToDataMapper;
+use EzSystems\EzPlatformAdminUi\UI\Module\Search\SearchViewParameterSupplier;
 use Pagerfanta\Pagerfanta;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -203,10 +204,10 @@ class SearchController extends Controller
             $editForm = $this->formFactory->contentEdit(
                 new ContentEditData()
             );
-            
+
             $results = $this->searchViewParameterSupplier->supply($pagerfanta->getCurrentPageResults(), $pagerfanta->getNbResults());
             $results['totalCount'] = $pagerfanta->getNbResults();
-            
+
             return $this->render('@ezdesign/admin/search/search.html.twig', [
                 'results' => $results,
                 'form' => $form->createView(),
