@@ -54,6 +54,11 @@ class SearchController extends Controller
     private $userContentTypeIdentifier;
 
     /**
+     * @var SearchViewParameterSupplier
+     */
+    private $searchViewParameterSupplier;
+
+    /**
      * @param \eZ\Publish\API\Repository\SearchService $searchService
      * @param \EzSystems\EzPlatformAdminUi\Tab\Dashboard\PagerContentToDataMapper $pagerContentToDataMapper
      * @param \Symfony\Component\Routing\Generator\UrlGeneratorInterface $urlGenerator
@@ -63,6 +68,7 @@ class SearchController extends Controller
      * @param \eZ\Publish\API\Repository\ContentTypeService $contentTypeService
      * @param int $defaultPaginationLimit
      * @param array $userContentTypeIdentifier
+     * @param SearchViewParameterSupplier $searchViewParameterSupplier
      */
     public function __construct(
         SearchService $searchService,
@@ -73,7 +79,8 @@ class SearchController extends Controller
         SectionService $sectionService,
         ContentTypeService $contentTypeService,
         int $defaultPaginationLimit,
-        array $userContentTypeIdentifier
+        array $userContentTypeIdentifier,
+        SearchViewParameterSupplier $searchViewParameterSupplier
     ) {
         $this->searchService = $searchService;
         $this->pagerContentToDataMapper = $pagerContentToDataMapper;
@@ -84,6 +91,7 @@ class SearchController extends Controller
         $this->contentTypeService = $contentTypeService;
         $this->defaultPaginationLimit = $defaultPaginationLimit;
         $this->userContentTypeIdentifier = $userContentTypeIdentifier;
+        $this->searchViewParameterSupplier = $searchViewParameterSupplier;
     }
 
     /**
@@ -195,9 +203,12 @@ class SearchController extends Controller
             $editForm = $this->formFactory->contentEdit(
                 new ContentEditData()
             );
-
+            
+            $results = $this->searchViewParameterSupplier->supply($pagerfanta->getCurrentPageResults(), $pagerfanta->getNbResults());
+            $results['totalCount'] = $pagerfanta->getNbResults();
+            
             return $this->render('@ezdesign/admin/search/search.html.twig', [
-                'results' => $this->pagerContentToDataMapper->map($pagerfanta),
+                'results' => $results,
                 'form' => $form->createView(),
                 'pager' => $pagerfanta,
                 'form_edit' => $editForm->createView(),

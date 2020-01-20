@@ -1,0 +1,27 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: true
+
+    EzSystems\EzPlatformAdminUi\UI\Module\Search\ValueObjectVisitor\ItemsRow:
+        parent: ezpublish_rest.output.value_object_visitor.base
+        autowire: true
+        autoconfigure: false
+        public: true
+        tags:
+            - { name: ezpublish_rest.output.value_object_visitor, type: EzSystems\EzPlatformAdminUi\UI\Module\Search\Values\ItemsRow }
+
+    EzSystems\EzPlatformAdminUi\UI\Module\Search\ValueObjectVisitor\ItemsList:
+        parent: ezpublish_rest.output.value_object_visitor.base
+        autowire: true
+        autoconfigure: false
+        public: true
+        tags:
+            - { name: ezpublish_rest.output.value_object_visitor, type: EzSystems\EzPlatformAdminUi\UI\Module\Search\Values\ItemsList }
+
+
+    EzSystems\EzPlatformAdminUi\UI\Module\Search\SearchViewParameterSupplier:
+        $outputVisitor: '@ezpublish_rest.output.visitor.json'
+        $outputGenerator: '@ezpublish_rest.output.generator.json'
+        $contentTypeInfoListValueObjectVisitor: '@ezpublish_rest.output.value_object_visitor.ContentTypeInfoList'
