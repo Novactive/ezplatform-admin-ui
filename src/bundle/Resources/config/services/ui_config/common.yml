@@ -28,7 +28,7 @@ services:
             - { name: ezplatform.admin_ui.config_provider, key: 'sortOrderMappings' }
 
     ezsystems.ezplatform_admin_ui.ui.config.provider.image_variations:
-        class: EzSystems\EzPlatformAdminUi\UI\Config\Provider\Value
+        class: EzSystems\EzPlatformAdminUi\UI\Config\Provider\ImageVariations
         lazy: true
         arguments:
             $value: '$image_variations$'
