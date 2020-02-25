@@ -34,7 +34,7 @@ export default class EzBtnImageVariation extends EzEmbedImageButton {
     getImageVariationOptions() {
         return Object.keys(eZ.adminUiConfig.imageVariations).map((variation) => (
             <option key={variation} value={variation}>
-                {variation}
+                {Translator.trans(variation, {}, 'image_variations')}
             </option>
         ));
     }
