@@ -8,7 +8,9 @@ use eZ\Publish\API\Repository\ContentService;
 use eZ\Publish\API\Repository\ContentTypeService;
 use eZ\Publish\API\Repository\LocationService;
 use eZ\Publish\API\Repository\PermissionResolver;
+use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\Location;
+use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use eZ\Publish\Core\REST\Common\Output\Visitor;
 use eZ\Publish\Core\REST\Server\Output\ValueObjectVisitor\ContentTypeInfoList as ContentTypeInfoListValueObjectVisitor;
@@ -110,14 +112,16 @@ class SearchViewParameterSupplier
      * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
-    public function supply(array $contents)
+    public function supply(array $searchHits)
     {
         /** @var \eZ\Publish\API\Repository\Values\ContentType\ContentType[] $contentTypes */
         $contentTypes = [];
         $itemsRows = [];
 
-        foreach ($contents as $content) {
-
+        /** @var SearchHit $searchHit */
+        foreach ($searchHits as $searchHit) {
+            /** @var Content $content */
+            $content = $searchHit->valueObject;
             $contentType = $content->getContentType();
 
             if (!isset($contentTypes[$contentType->identifier])) {
@@ -136,7 +140,7 @@ class SearchViewParameterSupplier
 
         return [
             'items' => $itemsListJson,
-            'content_type_info_list' => $contentTypeInfoListJson
+            'content_type_info_list' => $contentTypeInfoListJson,
         ];
     }
 
