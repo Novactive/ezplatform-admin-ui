@@ -12,6 +12,7 @@ use eZ\Publish\API\Repository\ContentService;
 use eZ\Publish\API\Repository\Exceptions\UnauthorizedException;
 use eZ\Publish\API\Repository\LocationService;
 use eZ\Publish\API\Repository\UserService;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use EzSystems\EzPlatformAdminUi\Specification\Content\ContentDraftHasConflict;
 use EzSystems\EzPlatformAdminUi\Specification\ContentIsUser;
 use EzSystems\EzPlatformAdminUi\UI\Dataset\DatasetFactory;
@@ -36,25 +37,31 @@ class VersionDraftConflictController extends Controller
     /** @var \Symfony\Component\Translation\TranslatorInterface */
     private $translator;
 
+    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    private $configResolver;
+
     /**
-     * @param \eZ\Publish\API\Repository\LocationService $locationService
-     * @param \eZ\Publish\API\Repository\ContentService $contentService
+     * @param \eZ\Publish\API\Repository\LocationService             $locationService
+     * @param \eZ\Publish\API\Repository\ContentService              $contentService
      * @param \EzSystems\EzPlatformAdminUi\UI\Dataset\DatasetFactory $datasetFactory
-     * @param \eZ\Publish\API\Repository\UserService $userService
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
+     * @param \eZ\Publish\API\Repository\UserService                 $userService
+     * @param \Symfony\Component\Translation\TranslatorInterface     $translator
+     * @param \eZ\Publish\Core\MVC\ConfigResolverInterface           $configResolver
      */
     public function __construct(
         LocationService $locationService,
         ContentService $contentService,
         DatasetFactory $datasetFactory,
         UserService $userService,
-        TranslatorInterface $translator
+        TranslatorInterface $translator,
+        ConfigResolverInterface $configResolver
     ) {
         $this->locationService = $locationService;
         $this->contentService = $contentService;
         $this->datasetFactory = $datasetFactory;
         $this->userService = $userService;
         $this->translator = $translator;
+        $this->configResolver = $configResolver;
     }
 
     /**
@@ -89,7 +96,8 @@ class VersionDraftConflictController extends Controller
             return new Response($error, Response::HTTP_FORBIDDEN);
         }
 
-        if ($contentDraftHasConflict) {
+        $conflictResolution = $this->configResolver->getParameter('content.edit.draft_conflict_resolution');
+        if ($contentDraftHasConflict && $conflictResolution === 'manual') {
             $versionsDataset = $this->datasetFactory->versions();
             $versionsDataset->load($contentInfo);
             $conflictedDrafts = $versionsDataset->getConflictedDraftVersions($contentInfo->currentVersionNo, $languageCode);
